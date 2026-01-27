@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Gold & Silver Rates</title>
+<title>Live Metal Rates</title>
 
 <style>
-body { font-family: Arial; background:#f4f6f9; text-align:center; padding:40px;}
-.card { background:#fff; max-width:450px; margin:auto; padding:25px;
-border-radius:10px; box-shadow:0 0 10px #ccc;}
+body {
+  font-family: Arial;
+  background:#f4f6f9;
+  text-align:center;
+  padding:40px;
+}
+
+.card {
+  background:#fff;
+  max-width:450px;
+  margin:auto;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 0 10px #ccc;
+}
+
 h2 { color:#333; }
-.row { font-size:18px; margin:8px; }
+.section { margin:20px 0; }
+.row { font-size:18px; margin:6px; }
+.time { color:#666; font-size:14px; }
 </style>
 </head>
 
@@ -18,42 +33,75 @@ h2 { color:#333; }
 
 <h2>Live Metal Rates</h2>
 
+<div class="section">
 <h3>Gold (24K)</h3>
 <div class="row">Buy: ₹ <span id="gBuy">--</span></div>
 <div class="row">Sell: ₹ <span id="gSell">--</span></div>
+<div class="time">Updated: <span id="gTime">--</span></div>
+</div>
 
 <hr>
 
+<div class="section">
 <h3>Silver</h3>
 <div class="row">Buy: ₹ <span id="sBuy">--</span></div>
 <div class="row">Sell: ₹ <span id="sSell">--</span></div>
-
-<p>Updated: <span id="time">--</span></p>
+<div class="time">Updated: <span id="sTime">--</span></div>
+</div>
 
 </div>
 
 <script>
 
-const goldAPI = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD";
-const silverAPI = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER";
+// Free CORS proxy
+const proxy = "https://api.allorigins.win/raw?url=";
 
-async function load() {
+const goldAPI =
+proxy + encodeURIComponent(
+"https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
+);
 
-  const g = await fetch(goldAPI).then(r=>r.json());
-  const s = await fetch(silverAPI).then(r=>r.json());
+const silverAPI =
+proxy + encodeURIComponent(
+"https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
+);
 
-  document.getElementById("gBuy").innerText = g.data.aura_buy_price;
-  document.getElementById("gSell").innerText = g.data.aura_sell_price;
+async function loadData() {
 
-  document.getElementById("sBuy").innerText = s.data.aura_buy_price;
-  document.getElementById("sSell").innerText = s.data.aura_sell_price;
+  try {
 
-  document.getElementById("time").innerText =
-    new Date().toLocaleString();
+    // GOLD
+    const gRes = await fetch(goldAPI);
+    const gJson = await gRes.json();
+    const g = gJson.data;
+
+    document.getElementById("gBuy").innerText = g.aura_buy_price;
+    document.getElementById("gSell").innerText = g.aura_sell_price;
+    document.getElementById("gTime").innerText =
+      new Date(g.created_at).toLocaleString();
+
+
+    // SILVER
+    const sRes = await fetch(silverAPI);
+    const sJson = await sRes.json();
+    const s = sJson.data;
+
+    document.getElementById("sBuy").innerText = s.aura_buy_price;
+    document.getElementById("sSell").innerText = s.aura_sell_price;
+    document.getElementById("sTime").innerText =
+      new Date(s.created_at).toLocaleString();
+
+  }
+  catch(err) {
+    console.log("Error:", err);
+  }
 }
 
-load();
-setInterval(load,600000); // 10 min refresh
+// First load
+loadData();
+
+// Refresh every 10 minutes
+setInterval(loadData, 600000);
 
 </script>
 
