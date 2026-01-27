@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Gold & Silver Rates</title>
+<title>FDJ Live Metal Rates</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -30,12 +30,12 @@ body{
 
 .dashboard{
   width:100%;
-  max-width:480px;
+  max-width:500px;
   background:rgba(255,255,255,0.12);
   backdrop-filter:blur(15px);
-  border-radius:18px;
-  padding:30px 25px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+  border-radius:20px;
+  padding:28px 25px;
+  box-shadow:0 25px 45px rgba(0,0,0,0.45);
   border:1px solid rgba(255,255,255,0.2);
 }
 
@@ -43,37 +43,53 @@ body{
 
 .header{
   text-align:center;
-  margin-bottom:25px;
+  margin-bottom:22px;
 }
 
 .header h1{
   font-size:26px;
   font-weight:600;
-  letter-spacing:1px;
+  letter-spacing:0.8px;
 }
 
 .header p{
-  font-size:14px;
+  font-size:13px;
   opacity:0.8;
-  margin-top:5px;
+  margin-top:4px;
+}
+
+/* Refresh Button */
+
+.refresh-btn{
+  margin-top:12px;
+  background:linear-gradient(135deg,#f7971e,#ffd200);
+  border:none;
+  color:#000;
+  font-weight:500;
+  padding:7px 16px;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:13px;
+  transition:0.3s;
+}
+
+.refresh-btn:hover{
+  opacity:0.85;
 }
 
 /* Sections */
 
 .section{
   background:rgba(255,255,255,0.08);
-  border-radius:14px;
-  padding:20px;
-  margin-bottom:18px;
+  border-radius:15px;
+  padding:18px 18px;
+  margin-bottom:16px;
   border:1px solid rgba(255,255,255,0.15);
 }
 
 .section h2{
   font-size:18px;
-  margin-bottom:12px;
-  display:flex;
-  align-items:center;
-  gap:6px;
+  margin-bottom:10px;
 }
 
 /* Rows */
@@ -81,7 +97,7 @@ body{
 .row{
   display:flex;
   justify-content:space-between;
-  margin:8px 0;
+  margin:7px 0;
   font-size:16px;
 }
 
@@ -97,21 +113,19 @@ body{
 
 .time{
   text-align:right;
-  font-size:13px;
+  font-size:12px;
   opacity:0.7;
-  margin-top:10px;
+  margin-top:8px;
 }
 
 /* Footer */
 
 .footer{
   text-align:center;
-  font-size:12px;
+  font-size:11px;
   opacity:0.6;
-  margin-top:10px;
+  margin-top:8px;
 }
-
-/* Loading */
 
 .loading{
   animation:pulse 1.5s infinite;
@@ -132,8 +146,12 @@ body{
 
   <!-- Header -->
   <div class="header">
-    <h1>Live Metal Rates</h1>
-    <p>Gold & Silver Market Dashboard</p>
+    <h1>FDJ Live Metal Rates</h1>
+    <p>Aura Gold Market Dashboard</p>
+
+    <button class="refresh-btn" onclick="manualRefresh()">
+      🔄 Refresh Now
+    </button>
   </div>
 
   <!-- GOLD -->
@@ -180,7 +198,7 @@ body{
 
   <!-- Footer -->
   <div class="footer">
-    Auto refresh every 10 minutes
+    Auto refresh at 00:30, 10:30, 20:30, 30:30, 40:30, 50:30
   </div>
 
 </div>
@@ -201,10 +219,9 @@ const silverAPI = proxy + encodeURIComponent(
   "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 );
 
-const REFRESH_TIME = 600000; // 10 min
 
 /* ===============================
-   DATE FORMATTER
+   DATE FORMAT
 ================================ */
 
 function formatDateTime(apiTime){
@@ -224,6 +241,7 @@ function formatDateTime(apiTime){
 
   return `${day}-${mon}-${year} ${time}`;
 }
+
 
 /* ===============================
    LOAD DATA
@@ -253,7 +271,6 @@ async function loadData(){
     document.getElementById("sTime").innerText = formatDateTime(s.created_at);
 
 
-    // Remove loading animation
     document.querySelectorAll(".loading")
       .forEach(el=>el.classList.remove("loading"));
 
@@ -264,13 +281,58 @@ async function loadData(){
 
 }
 
+
+/* ===============================
+   MANUAL REFRESH
+================================ */
+
+function manualRefresh(){
+  loadData();
+}
+
+
+/* ===============================
+   SCHEDULED REFRESH
+================================ */
+
+function scheduleNextRun(){
+
+  const now = new Date();
+
+  const min = now.getMinutes();
+  const sec = now.getSeconds();
+
+  const nextMin = Math.ceil((min + 0.01) / 10) * 10;
+
+  let target = new Date(now);
+
+  target.setMinutes(nextMin);
+  target.setSeconds(30);
+  target.setMilliseconds(0);
+
+  if(nextMin >= 60){
+    target.setHours(target.getHours() + 1);
+    target.setMinutes(0);
+  }
+
+  const delay = target.getTime() - now.getTime();
+
+  setTimeout(() => {
+
+    loadData();
+    scheduleNextRun();
+
+  }, delay);
+
+}
+
+
 /* ===============================
    INIT
 ================================ */
 
-loadData();
-
-setInterval(loadData, REFRESH_TIME);
+loadData();          // First load
+scheduleNextRun();   // Timed refresh
 
 </script>
 
