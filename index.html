@@ -132,8 +132,8 @@ body{
 
   <!-- Header -->
   <div class="header">
-    <h1>Live Metal Rates</h1>
-    <p>Gold & Silver Market Dashboard</p>
+    <h1>FDJ Live Gold & Silver Metal Rates</h1>
+    <p>Aura Gold Market Dashboard</p>
   </div>
 
   <!-- GOLD -->
@@ -180,7 +180,7 @@ body{
 
   <!-- Footer -->
   <div class="footer">
-    Auto refresh every 10 minutes
+    Auto refresh at every 10 mins
   </div>
 
 </div>
@@ -201,10 +201,9 @@ const silverAPI = proxy + encodeURIComponent(
   "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 );
 
-const REFRESH_TIME = 600000; // 10 min
 
 /* ===============================
-   DATE FORMATTER
+   DATE FORMAT
 ================================ */
 
 function formatDateTime(apiTime){
@@ -225,6 +224,7 @@ function formatDateTime(apiTime){
   return `${day}-${mon}-${year} ${time}`;
 }
 
+
 /* ===============================
    LOAD DATA
 ================================ */
@@ -236,41 +236,95 @@ async function loadData(){
     /* GOLD */
     const gRes = await fetch(goldAPI);
     const gJson = await gRes.json();
+
+    if(!gJson.data) throw "Gold Error";
+
     const g = gJson.data;
 
-    document.getElementById("gBuy").innerText = g.aura_buy_price.toFixed(2);
-    document.getElementById("gSell").innerText = g.aura_sell_price.toFixed(2);
-    document.getElementById("gTime").innerText = formatDateTime(g.created_at);
+    document.getElementById("gBuy").innerText =
+      Number(g.aura_buy_price).toFixed(2);
+
+    document.getElementById("gSell").innerText =
+      Number(g.aura_sell_price).toFixed(2);
+
+    document.getElementById("gTime").innerText =
+      formatDateTime(g.created_at);
 
 
     /* SILVER */
     const sRes = await fetch(silverAPI);
     const sJson = await sRes.json();
+
+    if(!sJson.data) throw "Silver Error";
+
     const s = sJson.data;
 
-    document.getElementById("sBuy").innerText = s.aura_buy_price.toFixed(2);
-    document.getElementById("sSell").innerText = s.aura_sell_price.toFixed(2);
-    document.getElementById("sTime").innerText = formatDateTime(s.created_at);
+    document.getElementById("sBuy").innerText =
+      Number(s.aura_buy_price).toFixed(2);
+
+    document.getElementById("sSell").innerText =
+      Number(s.aura_sell_price).toFixed(2);
+
+    document.getElementById("sTime").innerText =
+      formatDateTime(s.created_at);
 
 
-    // Remove loading animation
     document.querySelectorAll(".loading")
       .forEach(el=>el.classList.remove("loading"));
 
   }
   catch(err){
+
     console.error("API Error:",err);
+
+    document.getElementById("gTime").innerText = "API Error";
+    document.getElementById("sTime").innerText = "API Error";
   }
 
 }
+
+
+/* ===============================
+   SCHEDULER (00:30,10:30...)
+================================ */
+
+function scheduleNextRun(){
+
+  const now = new Date();
+
+  const min = now.getMinutes();
+
+  let nextMin = Math.ceil((min + 0.01)/10)*10;
+
+  let target = new Date(now);
+
+  target.setMinutes(nextMin);
+  target.setSeconds(30);
+  target.setMilliseconds(0);
+
+  if(nextMin >= 60){
+    target.setHours(target.getHours()+1);
+    target.setMinutes(0);
+  }
+
+  const delay = target - now;
+
+  setTimeout(()=>{
+
+    loadData();
+    scheduleNextRun();
+
+  },delay);
+
+}
+
 
 /* ===============================
    INIT
 ================================ */
 
-loadData();
-
-setInterval(loadData, REFRESH_TIME);
+loadData();        // Instant load
+scheduleNextRun(); // Aligned refresh
 
 </script>
 
