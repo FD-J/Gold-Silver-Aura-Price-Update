@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FDJ Live Metal Rates</title>
+<title>Live Gold & Silver Rates</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -30,12 +30,12 @@ body{
 
 .dashboard{
   width:100%;
-  max-width:500px;
+  max-width:480px;
   background:rgba(255,255,255,0.12);
   backdrop-filter:blur(15px);
-  border-radius:20px;
-  padding:28px 25px;
-  box-shadow:0 25px 45px rgba(0,0,0,0.45);
+  border-radius:18px;
+  padding:30px 25px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
   border:1px solid rgba(255,255,255,0.2);
 }
 
@@ -43,51 +43,37 @@ body{
 
 .header{
   text-align:center;
-  margin-bottom:22px;
+  margin-bottom:25px;
 }
 
 .header h1{
   font-size:26px;
   font-weight:600;
+  letter-spacing:1px;
 }
 
 .header p{
-  font-size:13px;
+  font-size:14px;
   opacity:0.8;
-  margin-top:4px;
-}
-
-/* Button */
-
-.refresh-btn{
-  margin-top:12px;
-  background:linear-gradient(135deg,#f7971e,#ffd200);
-  border:none;
-  color:#000;
-  font-weight:500;
-  padding:7px 16px;
-  border-radius:20px;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.refresh-btn:hover{
-  opacity:0.9;
+  margin-top:5px;
 }
 
 /* Sections */
 
 .section{
   background:rgba(255,255,255,0.08);
-  border-radius:15px;
-  padding:18px;
-  margin-bottom:16px;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:18px;
   border:1px solid rgba(255,255,255,0.15);
 }
 
 .section h2{
   font-size:18px;
-  margin-bottom:10px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
 /* Rows */
@@ -95,30 +81,37 @@ body{
 .row{
   display:flex;
   justify-content:space-between;
-  margin:7px 0;
+  margin:8px 0;
   font-size:16px;
 }
 
-.label{ opacity:0.85; }
-.value{ font-weight:500; }
+.label{
+  opacity:0.85;
+}
+
+.value{
+  font-weight:500;
+}
 
 /* Time */
 
 .time{
   text-align:right;
-  font-size:12px;
+  font-size:13px;
   opacity:0.7;
-  margin-top:8px;
+  margin-top:10px;
 }
 
 /* Footer */
 
 .footer{
   text-align:center;
-  font-size:11px;
+  font-size:12px;
   opacity:0.6;
-  margin-top:8px;
+  margin-top:10px;
 }
+
+/* Loading */
 
 .loading{
   animation:pulse 1.5s infinite;
@@ -139,12 +132,8 @@ body{
 
   <!-- Header -->
   <div class="header">
-    <h1>FDJ Live Metal Rates</h1>
-    <p>Aura Gold Market Dashboard</p>
-
-    <button class="refresh-btn" onclick="manualRefresh()">
-      🔄 Refresh Now
-    </button>
+    <h1>Live Metal Rates</h1>
+    <p>Gold & Silver Market Dashboard</p>
   </div>
 
   <!-- GOLD -->
@@ -191,7 +180,7 @@ body{
 
   <!-- Footer -->
   <div class="footer">
-    Auto refresh at 00:30, 10:30, 20:30, 30:30, 40:30, 50:30
+    Auto refresh every 10 minutes
   </div>
 
 </div>
@@ -199,25 +188,29 @@ body{
 <script>
 
 /* ===============================
-   CONFIG (STABLE PROXY)
+   CONFIG
 ================================ */
 
-const proxy = "https://corsproxy.io/?";
+const proxy = "https://api.allorigins.win/raw?url=";
 
-const goldAPI = proxy +
-  "https://api.auragold.in/api/data/v1/prices?product=24KGOLD";
+const goldAPI = proxy + encodeURIComponent(
+  "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
+);
 
-const silverAPI = proxy +
-  "https://api.auragold.in/api/data/v1/prices?product=24KSILVER";
+const silverAPI = proxy + encodeURIComponent(
+  "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
+);
 
+const REFRESH_TIME = 600000; // 10 min
 
 /* ===============================
-   DATE FORMAT
+   DATE FORMATTER
 ================================ */
 
 function formatDateTime(apiTime){
 
   const [datePart,timePart] = apiTime.split("T");
+
   const [year,month,day] = datePart.split("-");
 
   const months = [
@@ -226,11 +219,11 @@ function formatDateTime(apiTime){
   ];
 
   const mon = months[Number(month)-1];
+
   const time = timePart.split(".")[0];
 
   return `${day}-${mon}-${year} ${time}`;
 }
-
 
 /* ===============================
    LOAD DATA
@@ -243,102 +236,41 @@ async function loadData(){
     /* GOLD */
     const gRes = await fetch(goldAPI);
     const gJson = await gRes.json();
-
-    if(!gJson.data) throw "Gold API Error";
-
     const g = gJson.data;
 
-    document.getElementById("gBuy").innerText =
-      Number(g.aura_buy_price).toFixed(2);
-
-    document.getElementById("gSell").innerText =
-      Number(g.aura_sell_price).toFixed(2);
-
-    document.getElementById("gTime").innerText =
-      formatDateTime(g.created_at);
+    document.getElementById("gBuy").innerText = g.aura_buy_price.toFixed(2);
+    document.getElementById("gSell").innerText = g.aura_sell_price.toFixed(2);
+    document.getElementById("gTime").innerText = formatDateTime(g.created_at);
 
 
     /* SILVER */
     const sRes = await fetch(silverAPI);
     const sJson = await sRes.json();
-
-    if(!sJson.data) throw "Silver API Error";
-
     const s = sJson.data;
 
-    document.getElementById("sBuy").innerText =
-      Number(s.aura_buy_price).toFixed(2);
-
-    document.getElementById("sSell").innerText =
-      Number(s.aura_sell_price).toFixed(2);
-
-    document.getElementById("sTime").innerText =
-      formatDateTime(s.created_at);
+    document.getElementById("sBuy").innerText = s.aura_buy_price.toFixed(2);
+    document.getElementById("sSell").innerText = s.aura_sell_price.toFixed(2);
+    document.getElementById("sTime").innerText = formatDateTime(s.created_at);
 
 
+    // Remove loading animation
     document.querySelectorAll(".loading")
       .forEach(el=>el.classList.remove("loading"));
 
   }
   catch(err){
-
     console.error("API Error:",err);
-
-    document.getElementById("gTime").innerText = "API Error";
-    document.getElementById("sTime").innerText = "API Error";
   }
 
 }
-
-
-/* ===============================
-   MANUAL REFRESH
-================================ */
-
-function manualRefresh(){
-  loadData();
-}
-
-
-/* ===============================
-   SCHEDULE (00:30,10:30...)
-================================ */
-
-function scheduleNextRun(){
-
-  const now = new Date();
-
-  const min = now.getMinutes();
-
-  const nextMin = Math.ceil((min + 0.01)/10)*10;
-
-  let target = new Date(now);
-
-  target.setMinutes(nextMin);
-  target.setSeconds(30);
-  target.setMilliseconds(0);
-
-  if(nextMin >= 60){
-    target.setHours(target.getHours()+1);
-    target.setMinutes(0);
-  }
-
-  const delay = target - now;
-
-  setTimeout(()=>{
-    loadData();
-    scheduleNextRun();
-  },delay);
-
-}
-
 
 /* ===============================
    INIT
 ================================ */
 
 loadData();
-scheduleNextRun();
+
+setInterval(loadData, REFRESH_TIME);
 
 </script>
 
