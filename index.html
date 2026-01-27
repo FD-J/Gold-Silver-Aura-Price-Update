@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gold & Silver Rates</title>
+
+<style>
+body { font-family: Arial; background:#f4f6f9; text-align:center; padding:40px;}
+.card { background:#fff; max-width:450px; margin:auto; padding:25px;
+border-radius:10px; box-shadow:0 0 10px #ccc;}
+h2 { color:#333; }
+.row { font-size:18px; margin:8px; }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Live Metal Rates</h2>
+
+<h3>Gold (24K)</h3>
+<div class="row">Buy: ₹ <span id="gBuy">--</span></div>
+<div class="row">Sell: ₹ <span id="gSell">--</span></div>
+
+<hr>
+
+<h3>Silver</h3>
+<div class="row">Buy: ₹ <span id="sBuy">--</span></div>
+<div class="row">Sell: ₹ <span id="sSell">--</span></div>
+
+<p>Updated: <span id="time">--</span></p>
+
+</div>
+
+<script>
+
+const goldAPI = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD";
+const silverAPI = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER";
+
+async function load() {
+
+  const g = await fetch(goldAPI).then(r=>r.json());
+  const s = await fetch(silverAPI).then(r=>r.json());
+
+  document.getElementById("gBuy").innerText = g.data.aura_buy_price;
+  document.getElementById("gSell").innerText = g.data.aura_sell_price;
+
+  document.getElementById("sBuy").innerText = s.data.aura_buy_price;
+  document.getElementById("sSell").innerText = s.data.aura_sell_price;
+
+  document.getElementById("time").innerText =
+    new Date().toLocaleString();
+}
+
+load();
+setInterval(load,600000); // 10 min refresh
+
+</script>
+
+</body>
+</html>
