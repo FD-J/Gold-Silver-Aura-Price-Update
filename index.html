@@ -1,107 +1,276 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Live Metal Rates</title>
+<meta charset="UTF-8">
+<title>Live Gold & Silver Rates</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-body {
-  font-family: Arial;
-  background:#f4f6f9;
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:"Poppins",sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+}
+
+/* Main Card */
+
+.dashboard{
+  width:100%;
+  max-width:480px;
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(15px);
+  border-radius:18px;
+  padding:30px 25px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.2);
+}
+
+/* Header */
+
+.header{
   text-align:center;
-  padding:40px;
+  margin-bottom:25px;
 }
 
-.card {
-  background:#fff;
-  max-width:450px;
-  margin:auto;
-  padding:25px;
-  border-radius:10px;
-  box-shadow:0 0 10px #ccc;
+.header h1{
+  font-size:26px;
+  font-weight:600;
+  letter-spacing:1px;
 }
 
-h2 { color:#333; }
-.section { margin:20px 0; }
-.row { font-size:18px; margin:6px; }
-.time { color:#666; font-size:14px; }
+.header p{
+  font-size:14px;
+  opacity:0.8;
+  margin-top:5px;
+}
+
+/* Sections */
+
+.section{
+  background:rgba(255,255,255,0.08);
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:18px;
+  border:1px solid rgba(255,255,255,0.15);
+}
+
+.section h2{
+  font-size:18px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* Rows */
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin:8px 0;
+  font-size:16px;
+}
+
+.label{
+  opacity:0.85;
+}
+
+.value{
+  font-weight:500;
+}
+
+/* Time */
+
+.time{
+  text-align:right;
+  font-size:13px;
+  opacity:0.7;
+  margin-top:10px;
+}
+
+/* Footer */
+
+.footer{
+  text-align:center;
+  font-size:12px;
+  opacity:0.6;
+  margin-top:10px;
+}
+
+/* Loading */
+
+.loading{
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%{opacity:0.4;}
+  50%{opacity:1;}
+  100%{opacity:0.4;}
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="dashboard">
 
-<h2>Live Metal Rates</h2>
+  <!-- Header -->
+  <div class="header">
+    <h1>Live Metal Rates</h1>
+    <p>Gold & Silver Market Dashboard</p>
+  </div>
 
-<div class="section">
-<h3>Gold (24K)</h3>
-<div class="row">Buy: ₹ <span id="gBuy">--</span></div>
-<div class="row">Sell: ₹ <span id="gSell">--</span></div>
-<div class="time">Updated: <span id="gTime">--</span></div>
-</div>
+  <!-- GOLD -->
+  <div class="section">
 
-<hr>
+    <h2>🥇 Gold (24K)</h2>
 
-<div class="section">
-<h3>Silver</h3>
-<div class="row">Buy: ₹ <span id="sBuy">--</span></div>
-<div class="row">Sell: ₹ <span id="sSell">--</span></div>
-<div class="time">Updated: <span id="sTime">--</span></div>
-</div>
+    <div class="row">
+      <div class="label">Buy Rate</div>
+      <div class="value">₹ <span id="gBuy" class="loading">--</span></div>
+    </div>
+
+    <div class="row">
+      <div class="label">Sell Rate</div>
+      <div class="value">₹ <span id="gSell" class="loading">--</span></div>
+    </div>
+
+    <div class="time">
+      Updated: <span id="gTime">--</span>
+    </div>
+
+  </div>
+
+  <!-- SILVER -->
+  <div class="section">
+
+    <h2>🥈 Silver</h2>
+
+    <div class="row">
+      <div class="label">Buy Rate</div>
+      <div class="value">₹ <span id="sBuy" class="loading">--</span></div>
+    </div>
+
+    <div class="row">
+      <div class="label">Sell Rate</div>
+      <div class="value">₹ <span id="sSell" class="loading">--</span></div>
+    </div>
+
+    <div class="time">
+      Updated: <span id="sTime">--</span>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Auto refresh every 10 minutes
+  </div>
 
 </div>
 
 <script>
 
-// Free CORS proxy
+/* ===============================
+   CONFIG
+================================ */
+
 const proxy = "https://api.allorigins.win/raw?url=";
 
-const goldAPI =
-proxy + encodeURIComponent(
-"https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
+const goldAPI = proxy + encodeURIComponent(
+  "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
 );
 
-const silverAPI =
-proxy + encodeURIComponent(
-"https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
+const silverAPI = proxy + encodeURIComponent(
+  "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 );
 
-async function loadData() {
+const REFRESH_TIME = 600000; // 10 min
 
-  try {
+/* ===============================
+   DATE FORMATTER
+================================ */
 
-    // GOLD
+function formatDateTime(apiTime){
+
+  const [datePart,timePart] = apiTime.split("T");
+
+  const [year,month,day] = datePart.split("-");
+
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
+
+  const mon = months[Number(month)-1];
+
+  const time = timePart.split(".")[0];
+
+  return `${day}-${mon}-${year} ${time}`;
+}
+
+/* ===============================
+   LOAD DATA
+================================ */
+
+async function loadData(){
+
+  try{
+
+    /* GOLD */
     const gRes = await fetch(goldAPI);
     const gJson = await gRes.json();
     const g = gJson.data;
 
-    document.getElementById("gBuy").innerText = g.aura_buy_price;
-    document.getElementById("gSell").innerText = g.aura_sell_price;
-    document.getElementById("gTime").innerText =
-      new Date(g.created_at).toLocaleString();
+    document.getElementById("gBuy").innerText = g.aura_buy_price.toFixed(2);
+    document.getElementById("gSell").innerText = g.aura_sell_price.toFixed(2);
+    document.getElementById("gTime").innerText = formatDateTime(g.created_at);
 
 
-    // SILVER
+    /* SILVER */
     const sRes = await fetch(silverAPI);
     const sJson = await sRes.json();
     const s = sJson.data;
 
-    document.getElementById("sBuy").innerText = s.aura_buy_price;
-    document.getElementById("sSell").innerText = s.aura_sell_price;
-    document.getElementById("sTime").innerText =
-      new Date(s.created_at).toLocaleString();
+    document.getElementById("sBuy").innerText = s.aura_buy_price.toFixed(2);
+    document.getElementById("sSell").innerText = s.aura_sell_price.toFixed(2);
+    document.getElementById("sTime").innerText = formatDateTime(s.created_at);
+
+
+    // Remove loading animation
+    document.querySelectorAll(".loading")
+      .forEach(el=>el.classList.remove("loading"));
 
   }
-  catch(err) {
-    console.log("Error:", err);
+  catch(err){
+    console.error("API Error:",err);
   }
+
 }
 
-// First load
+/* ===============================
+   INIT
+================================ */
+
 loadData();
 
-// Refresh every 10 minutes
-setInterval(loadData, 600000);
+setInterval(loadData, REFRESH_TIME);
 
 </script>
 
