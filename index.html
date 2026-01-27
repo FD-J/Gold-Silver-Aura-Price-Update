@@ -2,330 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Gold & Silver Rates</title>
-
+<title>FDJ Live Metal Rates</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:"Poppins",sans-serif;
-}
-
-body{
-  min-height:100vh;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  color:#fff;
-}
-
-/* Main Card */
-
-.dashboard{
-  width:100%;
-  max-width:480px;
-  background:rgba(255,255,255,0.12);
-  backdrop-filter:blur(15px);
-  border-radius:18px;
-  padding:30px 25px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.4);
-  border:1px solid rgba(255,255,255,0.2);
-}
-
-/* Header */
-
-.header{
-  text-align:center;
-  margin-bottom:25px;
-}
-
-.header h1{
-  font-size:26px;
-  font-weight:600;
-  letter-spacing:1px;
-}
-
-.header p{
-  font-size:14px;
-  opacity:0.8;
-  margin-top:5px;
-}
-
-/* Sections */
-
-.section{
-  background:rgba(255,255,255,0.08);
-  border-radius:14px;
-  padding:20px;
-  margin-bottom:18px;
-  border:1px solid rgba(255,255,255,0.15);
-}
-
-.section h2{
-  font-size:18px;
-  margin-bottom:12px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-/* Rows */
-
-.row{
-  display:flex;
-  justify-content:space-between;
-  margin:8px 0;
-  font-size:16px;
-}
-
-.label{
-  opacity:0.85;
-}
-
-.value{
-  font-weight:500;
-}
-
-/* Time */
-
-.time{
-  text-align:right;
-  font-size:13px;
-  opacity:0.7;
-  margin-top:10px;
-}
-
-/* Footer */
-
-.footer{
-  text-align:center;
-  font-size:12px;
-  opacity:0.6;
-  margin-top:10px;
-}
-
-/* Loading */
-
-.loading{
-  animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-  0%{opacity:0.4;}
-  50%{opacity:1;}
-  100%{opacity:0.4;}
-}
-
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif;}
+body{min-height:100vh;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);display:flex;justify-content:center;align-items:center;color:#fff;}
+.dashboard{width:100%;max-width:480px;background:rgba(255,255,255,0.12);backdrop-filter:blur(15px);border-radius:18px;padding:30px 25px;box-shadow:0 20px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.2);}
+.header{text-align:center;margin-bottom:25px;}
+.header h1{font-size:26px;font-weight:600;letter-spacing:1px;}
+.header p{font-size:14px;opacity:0.8;margin-top:5px;}
+.refresh-btn{margin-top:12px;background:linear-gradient(135deg,#f7971e,#ffd200);border:none;color:#000;font-weight:500;padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;}
+.refresh-btn:hover{opacity:0.9;}
+.section{background:rgba(255,255,255,0.08);border-radius:14px;padding:20px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.15);}
+.section h2{font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.row{display:flex;justify-content:space-between;margin:8px 0;font-size:16px;}
+.label{opacity:0.85;}
+.value{font-weight:500;}
+.time{text-align:right;font-size:13px;opacity:0.7;margin-top:10px;}
+.footer{text-align:center;font-size:12px;opacity:0.6;margin-top:10px;}
+.loading{animation:pulse 1.5s infinite;}
+@keyframes pulse{0%{opacity:0.4;}50%{opacity:1;}100%{opacity:0.4;}}
 </style>
 </head>
-
 <body>
 
 <div class="dashboard">
 
-  <!-- Header -->
   <div class="header">
-    <h1>FDJ Live Gold & Silver Metal Rates</h1>
+    <h1>FDJ Live Metal Rates</h1>
     <p>Aura Gold Market Dashboard</p>
+    <button class="refresh-btn" onclick="loadData()">🔄 Refresh Now</button>
   </div>
 
   <!-- GOLD -->
   <div class="section">
-
     <h2>🥇 Gold (24K)</h2>
-
-    <div class="row">
-      <div class="label">Buy Rate</div>
-      <div class="value">₹ <span id="gBuy" class="loading">--</span></div>
-    </div>
-
-    <div class="row">
-      <div class="label">Sell Rate</div>
-      <div class="value">₹ <span id="gSell" class="loading">--</span></div>
-    </div>
-
-    <div class="time">
-      Updated: <span id="gTime">--</span>
-    </div>
-
+    <div class="row"><div class="label">Buy Rate</div><div class="value">₹ <span id="gBuy" class="loading">--</span></div></div>
+    <div class="row"><div class="label">Sell Rate</div><div class="value">₹ <span id="gSell" class="loading">--</span></div></div>
+    <div class="time">Updated: <span id="gTime">--</span></div>
   </div>
 
   <!-- SILVER -->
   <div class="section">
-
     <h2>🥈 Silver</h2>
-
-    <div class="row">
-      <div class="label">Buy Rate</div>
-      <div class="value">₹ <span id="sBuy" class="loading">--</span></div>
-    </div>
-
-    <div class="row">
-      <div class="label">Sell Rate</div>
-      <div class="value">₹ <span id="sSell" class="loading">--</span></div>
-    </div>
-
-    <div class="time">
-      Updated: <span id="sTime">--</span>
-    </div>
-
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    Auto refresh at every 10 mins
+    <div class="row"><div class="label">Buy Rate</div><div class="value">₹ <span id="sBuy" class="loading">--</span></div></div>
+    <div class="row"><div class="label">Sell Rate</div><div class="value">₹ <span id="sSell" class="loading">--</span></div></div>
+    <div class="time">Updated: <span id="sTime">--</span></div>
   </div>
 
 </div>
 
 <script>
-
-/* ===============================
-   CONFIG
-================================ */
-
 const proxy = "https://api.allorigins.win/raw?url=";
-
-const goldAPI = proxy + encodeURIComponent(
-  "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
-);
-
-const silverAPI = proxy + encodeURIComponent(
-  "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
-);
-
-
-/* ===============================
-   DATE FORMAT
-================================ */
+const goldAPI = proxy + encodeURIComponent("https://api.auragold.in/api/data/v1/prices?product=24KGOLD");
+const silverAPI = proxy + encodeURIComponent("https://api.auragold.in/api/data/v1/prices?product=24KSILVER");
 
 function formatDateTime(apiTime){
-
   const [datePart,timePart] = apiTime.split("T");
-
   const [year,month,day] = datePart.split("-");
-
-  const months = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec"
-  ];
-
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const mon = months[Number(month)-1];
-
   const time = timePart.split(".")[0];
-
   return `${day}-${mon}-${year} ${time}`;
 }
 
-
-/* ===============================
-   LOAD DATA
-================================ */
-
 async function loadData(){
-
   try{
-
-    /* GOLD */
+    // GOLD
     const gRes = await fetch(goldAPI);
     const gJson = await gRes.json();
-
-    if(!gJson.data) throw "Gold Error";
-
     const g = gJson.data;
+    document.getElementById("gBuy").innerText = Number(g.aura_buy_price).toFixed(2);
+    document.getElementById("gSell").innerText = Number(g.aura_sell_price).toFixed(2);
+    document.getElementById("gTime").innerText = formatDateTime(g.created_at);
 
-    document.getElementById("gBuy").innerText =
-      Number(g.aura_buy_price).toFixed(2);
-
-    document.getElementById("gSell").innerText =
-      Number(g.aura_sell_price).toFixed(2);
-
-    document.getElementById("gTime").innerText =
-      formatDateTime(g.created_at);
-
-
-    /* SILVER */
+    // SILVER
     const sRes = await fetch(silverAPI);
     const sJson = await sRes.json();
-
-    if(!sJson.data) throw "Silver Error";
-
     const s = sJson.data;
+    document.getElementById("sBuy").innerText = Number(s.aura_buy_price).toFixed(2);
+    document.getElementById("sSell").innerText = Number(s.aura_sell_price).toFixed(2);
+    document.getElementById("sTime").innerText = formatDateTime(s.created_at);
 
-    document.getElementById("sBuy").innerText =
-      Number(s.aura_buy_price).toFixed(2);
-
-    document.getElementById("sSell").innerText =
-      Number(s.aura_sell_price).toFixed(2);
-
-    document.getElementById("sTime").innerText =
-      formatDateTime(s.created_at);
-
-
-    document.querySelectorAll(".loading")
-      .forEach(el=>el.classList.remove("loading"));
-
+    document.querySelectorAll(".loading").forEach(el=>el.classList.remove("loading"));
   }
   catch(err){
-
     console.error("API Error:",err);
-
     document.getElementById("gTime").innerText = "API Error";
     document.getElementById("sTime").innerText = "API Error";
   }
-
 }
 
-
-/* ===============================
-   SCHEDULER (00:30,10:30...)
-================================ */
-
-function scheduleNextRun(){
-
-  const now = new Date();
-
-  const min = now.getMinutes();
-
-  let nextMin = Math.ceil((min + 0.01)/10)*10;
-
-  let target = new Date(now);
-
-  target.setMinutes(nextMin);
-  target.setSeconds(30);
-  target.setMilliseconds(0);
-
-  if(nextMin >= 60){
-    target.setHours(target.getHours()+1);
-    target.setMinutes(0);
-  }
-
-  const delay = target - now;
-
-  setTimeout(()=>{
-
-    loadData();
-    scheduleNextRun();
-
-  },delay);
-
-}
-
-
-/* ===============================
-   INIT
-================================ */
-
-loadData();        // Instant load
-scheduleNextRun(); // Aligned refresh
-
+// Initial load
+loadData();
 </script>
 
 </body>
