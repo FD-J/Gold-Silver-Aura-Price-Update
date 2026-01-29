@@ -1,28 +1,25 @@
-name: Update Live Rates
+name: Live Price Update
 on:
   schedule:
-    # Runs at 0, 10, 20, 30, 40, and 50 minutes past every hour
-    - cron: '*/10.5 * * * *'
-  workflow_dispatch: # Allows you to run it manually
+    # Runs at the start of every 10th minute
+    - cron: '0,10,20,30,40,50 * * * *'
+  workflow_dispatch:
 
 jobs:
-  build:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: Install dependencies
-        run: pip install requests
-      - name: Run update script
-        run: python update_rates.py
-      - name: Commit and push changes
+      - uses: actions/checkout@v2
+      - name: Wait for 30 Seconds
+        run: sleep 30  # This ensures it fetches at exactly :30 seconds past the minute
+      - name: Run Update
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
+          pip install requests
+          python update_rates.py
+      - name: Push to GitHub
+        run: |
+          git config --global user.name "Bot"
+          git config --global user.email "bot@github.com"
           git add index.html
-          git commit -m "Update rates" || exit 0
+          git commit -m "API Sync: $(date)" || exit 0
           git push
