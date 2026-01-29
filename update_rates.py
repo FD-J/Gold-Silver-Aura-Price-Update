@@ -1,6 +1,5 @@
 import requests
 import datetime
-import json
 import os
 
 GOLD_API = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD"
@@ -8,54 +7,66 @@ SILVER_API = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER"
 
 def fetch_data(url):
     try:
-        response = requests.get(url, timeout=15)
-        return response.json().get('data', {})
+        # We add a timestamp to the request to ensure we get the freshest data
+        response = requests.get(f"{{url}}&t={{int(datetime.datetime.now().timestamp())}}", timeout=15)
+        return response.json().get('data', {{}})
     except:
-        return {}
+        return {{}}
+
+def format_api_time(date_str):
+    if not date_str: return "N/A"
+    try:
+        # Convert API string (2025-01-29 14:30:05) to a nicer format
+        dt = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime('%d %b, %H:%M:%S')
+    except:
+        return date_str
 
 def main():
     gold = fetch_data(GOLD_API)
     silver = fetch_data(SILVER_API)
 
-    if not gold or not silver: return
+    if not gold or not silver:
+        print("Data fetch failed.")
+        return
 
-    # Extract prices and API's own timestamp
-    g_buy = gold.get('aura_buy_price', 0)
-    g_sell = gold.get('aura_sell_price', 0)
-    s_buy = silver.get('aura_buy_price', 0)
-    s_sell = silver.get('aura_sell_price', 0)
+    # Extract prices and API timestamps
+    g_price = f"{{float(gold.get('aura_buy_price', 0)):,.2f}}"
+    s_price = f"{{float(silver.get('aura_buy_price', 0)):,.2f}}"
     
-    # Use API time if available, otherwise current time
-    api_time = gold.get('created_at', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    # GETTING API UPDATED DATA FOR TIME
+    g_time = format_api_time(gold.get('created_at'))
+    s_time = format_api_time(silver.get('created_at'))
 
     html_template = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="30"> <title>FDJ Live</title>
+    <meta http-equiv="refresh" content="30">
     <style>
         body {{ background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }}
-        .card {{ background: #1e293b; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; border: 1px solid #334155; }}
-        h2 {{ color: #fbbf24; text-align: center; margin-bottom: 20px; }}
-        .row {{ display: flex; justify-content: space-between; margin: 10px 0; padding-bottom: 5px; border-bottom: 1px solid #2d3748; }}
-        .label {{ color: #94a3b8; font-size: 14px; }}
-        .price {{ font-weight: bold; font-size: 18px; color: #f8fafc; }}
-        .footer {{ text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; }}
+        .card {{ background: #1e293b; padding: 20px; border-radius: 15px; width: 350px; border: 1px solid #334155; }}
+        .price {{ font-size: 24px; font-weight: bold; color: #fbbf24; }}
+        .time {{ font-size: 12px; color: #94a3b8; margin-bottom: 15px; }}
+        h3 {{ margin: 0; font-size: 14px; text-transform: uppercase; color: #64748b; }}
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>FDJ Live Rates</h2>
-        <div class="row"><span class="label">Gold Buy</span><span class="price">₹{float(g_buy):,.2f}</span></div>
-        <div class="row"><span class="label">Gold Sell</span><span class="price">₹{float(g_sell):,.2f}</span></div>
-        <div class="row"><span class="label">Silver Buy</span><span class="price">₹{float(s_buy):,.2f}</span></div>
-        <div class="row"><span class="label">Silver Sell</span><span class="price">₹{float(s_sell):,.2f}</span></div>
-        <div class="footer">
-            Market Live: {api_time}<br>
-            Next refresh in 30s...
-        </div>
+        <h2 style="text-align:center">FDJ Live</h2>
+        
+        <h3>Gold (24K)</h3>
+        <div class="price">₹{{g_price}}</div>
+        <div class="time">API Last Update: {{g_time}}</div>
+        
+        <hr style="border:0; border-top:1px solid #334155; margin: 15px 0;">
+        
+        <h3>Silver</h3>
+        <div class="price">₹{{s_price}}</div>
+        <div class="time">API Last Update: {{s_time}}</div>
+
+        <p style="text-align:center; font-size:10px; color:#475569;">Page auto-refreshes every 30s</p>
     </div>
 </body>
 </html>
