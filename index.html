@@ -3,96 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FDJ Live Rates - Ultra Fast</title>
+    <title>FDJ Live Metal Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
-        body{min-height:100vh;background:#0f172a;display:flex;justify-content:center;align-items:center;color:#fff;}
-        .dashboard{width:90%;max-width:400px;background:rgba(30,41,59,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:24px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);}
-        .header{text-align:center;margin-bottom:20px;}
-        .section{background:rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:12px;}
-        .row{display:flex;justify-content:space-between;margin:6px 0;font-size:18px;}
-        .label{color:#94a3b8;font-size:14px;margin-bottom:8px;}
-        .value{font-variant-numeric: tabular-nums;font-weight:600;color:#fbbf24;}
-        .time{text-align:right;font-size:11px;color:#64748b;margin-top:8px;}
-        .error { color: #f87171; font-size: 12px; text-align: center; margin-top: 10px; }
-        .loading-text { color: #64748b; }
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-gold: #fbbf24;
+            --accent-silver: #94a3b8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .header p { font-size: 14px; color: var(--text-dim); }
+
+        .metal-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .metal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gold { color: var(--accent-gold); }
+        .silver { color: var(--accent-silver); }
+
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .price-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-label { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+        .price-value { 
+            font-size: 20px; 
+            font-weight: 600; 
+            font-variant-numeric: tabular-nums;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 10px #22c55e;
+        }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <div class="header"><h1>FDJ Metal Live</h1></div>
-
-    <div class="section">
-        <div class="label">🥇 Gold 24K (per gm)</div>
-        <div class="row"><span>Buy</span><span class="value" id="gBuy">--</span></div>
-        <div class="row"><span>Sell</span><span class="value" id="gSell">--</span></div>
-        <div id="gTime" class="time">Connecting...</div>
+    <div class="header">
+        <h1>FDJ Metal Rates</h1>
+        <p>Aura Gold Live Feed</p>
     </div>
 
-    <div class="section">
-        <div class="label">🥈 Silver (per kg)</div>
-        <div class="row"><span>Buy</span><span class="value" id="sBuy">--</span></div>
-        <div class="row"><span>Sell</span><span class="value" id="sSell">--</span></div>
-        <div id="sTime" class="time">Connecting...</div>
+    <div class="metal-card">
+        <div class="metal-header gold">
+            <span>🥇</span> Gold 24K (per gm)
+        </div>
+        <div class="price-grid">
+            <div class="price-item">
+                <span class="price-label">BUY RATE</span>
+                <span class="price-value">₹{g_buy}</span>
+            </div>
+            <div class="price-item">
+                <span class="price-label">SELL RATE</span>
+                <span class="price-value">₹{g_sell}</span>
+            </div>
+        </div>
     </div>
-    <div id="errMsg" class="error"></div>
+
+    <div class="metal-card">
+        <div class="metal-header silver">
+            <span>🥈</span> Silver (per kg)
+        </div>
+        <div class="price-grid">
+            <div class="price-item">
+                <span class="price-label">BUY RATE</span>
+                <span class="price-value">₹{s_buy}</span>
+            </div>
+            <div class="price-item">
+                <span class="price-label">SELL RATE</span>
+                <span class="price-value">₹{s_sell}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span class="live-indicator"></span>
+        Last Updated: {last_update}
+    </div>
 </div>
 
-<script>
-    const G_URL = "https://api.auragold.in/api/data/v1/prices?product=24KGOLD";
-    const S_URL = "https://api.auragold.in/api/data/v1/prices?product=24KSILVER";
-    const PROXY = "https://api.allorigins.win/raw?url=";
-
-    async function fastFetch(url) {
-        // We add a timestamp to force the proxy to get fresh data
-        const target = `${url}&t=${Date.now()}`;
-        
-        try {
-            // Attempt 1: Direct (Fastest, but might fail CORS)
-            const response = await fetch(target, { mode: 'cors' });
-            return await response.json();
-        } catch (e) {
-            // Attempt 2: Proxy Fallback (Slightly slower but works)
-            const proxiedResponse = await fetch(PROXY + encodeURIComponent(target));
-            if (!proxiedResponse.ok) throw new Error("Server Offline");
-            return await proxiedResponse.json();
-        }
-    }
-
-    async function loadData() {
-        document.getElementById('errMsg').textContent = "";
-        
-        try {
-            const [goldData, silverData] = await Promise.all([
-                fastFetch(G_URL),
-                fastFetch(S_URL)
-            ]);
-
-            if(goldData.data && silverData.data) {
-                render(goldData.data, silverData.data);
-            }
-        } catch (err) {
-            document.getElementById('errMsg').textContent = "Update failed. Retrying...";
-            console.error(err);
-        }
-    }
-
-    function render(g, s) {
-        document.getElementById("gBuy").textContent = "₹" + parseFloat(g.aura_buy_price).toFixed(2);
-        document.getElementById("gSell").textContent = "₹" + parseFloat(g.aura_sell_price).toFixed(2);
-        document.getElementById("sBuy").textContent = "₹" + parseFloat(s.aura_buy_price).toFixed(2);
-        document.getElementById("sSell").textContent = "₹" + parseFloat(s.aura_sell_price).toFixed(2);
-        
-        const now = new Date().toLocaleTimeString();
-        document.getElementById("gTime").textContent = "Live: " + now;
-        document.getElementById("sTime").textContent = "Live: " + now;
-    }
-
-    // Run immediately
-    loadData();
-    // Refresh every 30 seconds for balance between speed and server load
-    setInterval(loadData, 30000);
-</script>
 </body>
 </html>
